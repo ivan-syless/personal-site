@@ -565,6 +565,20 @@ footer span { font-size: .65rem; color: var(--dim); letter-spacing: .06em; }
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .pdf-actions { display: flex; gap: .6rem; align-items: center; flex-shrink: 0; }
+.pdf-nav-btn {
+  font-size: .7rem; color: var(--muted);
+  background: none; border: 1px solid var(--border);
+  padding: .32rem .75rem; border-radius: 2px;
+  font-family: 'JetBrains Mono', monospace;
+  cursor: pointer; transition: color .2s, border-color .2s;
+  line-height: 1;
+}
+.pdf-nav-btn:hover { color: var(--accent2); border-color: var(--accent); }
+.pdf-page-info {
+  font-size: .68rem; color: var(--muted);
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: .06em; min-width: 60px; text-align: center;
+}
 .pdf-open-btn {
   font-size: .7rem; color: var(--accent2);
   background: none; border: 1px solid rgba(126,200,227,.25);
@@ -582,13 +596,31 @@ footer span { font-size: .65rem; color: var(--dim); letter-spacing: .06em; }
   cursor: pointer; transition: color .2s, border-color .2s;
 }
 .pdf-close:hover { color: var(--white); border-color: var(--accent); }
-.pdf-body { flex: 1; overflow: hidden; background: #1c1c1c; }
-.pdf-body iframe { width: 100%; height: 100%; border: none; display: block; }
-.pdf-loading {
-  display: flex; align-items: center; justify-content: center;
-  height: 100%; flex-direction: column; gap: .75rem;
+
+.pdf-body {
+  flex: 1; overflow-y: auto; overflow-x: hidden;
+  display: flex; flex-direction: column; align-items: center;
+  background: #2a2a2a;
+  padding: 1.5rem 1rem;
+  gap: 1rem;
+}
+.pdf-body::-webkit-scrollbar { width: 4px; }
+.pdf-body::-webkit-scrollbar-track { background: transparent; }
+.pdf-body::-webkit-scrollbar-thumb { background: var(--dim); border-radius: 2px; }
+
+.pdf-canvas-wrap {
+  box-shadow: 0 4px 32px rgba(0,0,0,0.5);
+  line-height: 0;
+}
+.pdf-canvas-wrap canvas {
+  display: block;
+  max-width: 100%;
+}
+
+.pdf-status {
   font-family: 'EB Garamond', serif; font-style: italic;
   font-size: 1rem; color: var(--muted);
+  text-align: center; padding: 3rem 1rem;
 }
 </style>
 </head>
@@ -724,7 +756,7 @@ footer span { font-size: .65rem; color: var(--dim); letter-spacing: .06em; }
       <div class="research-title">Your Thesis Title Here</div>
       <p class="research-desc">Replace with your real thesis summary — what problem you studied, what approach, and what you found.</p>
       <div class="research-tags"><span class="rtag">Replace</span><span class="rtag">With</span><span class="rtag">Real Tags</span></div>
-      <a href="#" class="research-link" onclick="openPDF('files/thesis.pdf', 'Thesis — Vacancy-Driven Electronic Structure Modulation in Monolayer WS₂'); return false;">Read thesis →</a>
+      <a href="#" class="research-link" onclick="openPDF('files/thesis.pdf', 'Vacancy-Driven Electronic Structure Modulation in Monolayer WS₂'); return false;">Read thesis →</a>
     </div>
     <div class="research-card" data-num="02">
       <div class="research-type">Non-Academic Project</div>
@@ -911,13 +943,15 @@ t = <span class="c-fn">np.linspace</span>(<span class="c-num">0</span>, <span cl
   <div class="pdf-topbar">
     <span class="pdf-title" id="pdfTitle">Document</span>
     <div class="pdf-actions">
-      <a class="pdf-open-btn" id="pdfOpenLink" href="#" target="_blank">Open in new tab ↗</a>
+      <button class="pdf-nav-btn" onclick="pdfPrevPage()">&#8592;</button>
+      <span class="pdf-page-info" id="pdfPageInfo">— / —</span>
+      <button class="pdf-nav-btn" onclick="pdfNextPage()">&#8594;</button>
+      <a class="pdf-open-btn" id="pdfOpenLink" href="#" target="_blank">Download ↓</a>
       <button class="pdf-close" onclick="closePDF()">✕ close</button>
     </div>
   </div>
-  <div class="pdf-body">
-    <div class="pdf-loading" id="pdfLoading">Loading document…</div>
-    <iframe id="pdfFrame" src="" title="PDF viewer" onload="document.getElementById('pdfLoading').style.display='none'"></iframe>
+  <div class="pdf-body" id="pdfBody">
+    <div class="pdf-status" id="pdfStatus">Loading…</div>
   </div>
 </div>
 <script>
@@ -1036,27 +1070,119 @@ document.getElementById('lightbox').addEventListener('touchend', e => {
   const dx = e.changedTouches[0].clientX - touchStartX;
   if (Math.abs(dx) > 50) { dx < 0 ? lbNext() : lbPrev(); }
 });
+// ── PDF Viewer — PDF.js canvas renderer ───────────────────────
+// Loads PDF.js from CDN, renders every page as a crisp canvas.
+// Works perfectly on GitHub Pages — no iframes, no browser prompts.
+let pdfDoc = null, pdfCurrentPage = 1, pdfTotalPages = 0;
+let pdfRenderTask = null;
+
+function loadPDFjs(callback) {
+  if (window.pdfjsLib) { callback(); return; }
+  const script = document.createElement('script');
+  script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+  script.onload = () => {
+    window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    callback();
+  };
+  document.head.appendChild(script);
+}
+
 function openPDF(src, title) {
-  const viewer  = document.getElementById('pdfViewer');
-  const frame   = document.getElementById('pdfFrame');
-  const link    = document.getElementById('pdfOpenLink');
-  const label   = document.getElementById('pdfTitle');
-  // Build the absolute URL of the PDF on GitHub Pages
-  const absURL  = window.location.origin + '/' + src.replace(/^\//, '');
-  // Route through Google Docs Viewer — renders inline, no download prompt
-  frame.src     = 'https://docs.google.com/viewer?url=' + encodeURIComponent(absURL) + '&embedded=true';
-  if (link)  link.href = absURL;
+  const viewer = document.getElementById('pdfViewer');
+  const link   = document.getElementById('pdfOpenLink');
+  const label  = document.getElementById('pdfTitle');
+  if (link)  link.href = src;
   if (label) label.textContent = title || 'Document';
+  document.getElementById('pdfStatus').style.display = 'block';
+  document.getElementById('pdfStatus').textContent = 'Loading…';
+  document.getElementById('pdfBody').innerHTML =
+    '<div class="pdf-status" id="pdfStatus">Loading…</div>';
   viewer.classList.add('open');
   document.body.style.overflow = 'hidden';
+  pdfCurrentPage = 1;
+
+  loadPDFjs(() => {
+    pdfjsLib.getDocument(src).promise.then(doc => {
+      pdfDoc = doc;
+      pdfTotalPages = doc.numPages;
+      // Render all pages stacked
+      const body = document.getElementById('pdfBody');
+      body.innerHTML = '';
+      const renders = [];
+      for (let p = 1; p <= pdfTotalPages; p++) renders.push(renderPDFPage(p, body));
+      Promise.all(renders).then(() => {
+        document.getElementById('pdfPageInfo').textContent = `1 / ${pdfTotalPages}`;
+        // Track which page is visible on scroll
+        trackPDFScroll(body);
+      });
+    }).catch(err => {
+      document.getElementById('pdfBody').innerHTML =
+        `<div class="pdf-status">Could not load PDF.<br><a href="${src}" style="color:var(--accent2)" target="_blank">Click here to download it instead.</a></div>`;
+      console.error(err);
+    });
+  });
+}
+
+function renderPDFPage(pageNum, container) {
+  return pdfDoc.getPage(pageNum).then(page => {
+    // Scale to fill ~90% of viewer width, max 1400px
+    const viewerW = Math.min(document.getElementById('pdfBody').clientWidth * 0.92, 1400);
+    const viewport = page.getViewport({ scale: 1 });
+    const scale    = viewerW / viewport.width;
+    const scaled   = page.getViewport({ scale });
+
+    const wrap   = document.createElement('div');
+    wrap.className = 'pdf-canvas-wrap';
+    wrap.dataset.page = pageNum;
+
+    const canvas = document.createElement('canvas');
+    canvas.width  = Math.floor(scaled.width);
+    canvas.height = Math.floor(scaled.height);
+    canvas.style.width  = canvas.width  + 'px';
+    canvas.style.height = canvas.height + 'px';
+    wrap.appendChild(canvas);
+    container.appendChild(wrap);
+
+    return page.render({ canvasContext: canvas.getContext('2d'), viewport: scaled }).promise;
+  });
+}
+
+function trackPDFScroll(body) {
+  body.addEventListener('scroll', () => {
+    const wraps = body.querySelectorAll('.pdf-canvas-wrap');
+    wraps.forEach(w => {
+      const rect = w.getBoundingClientRect();
+      if (rect.top >= 0 && rect.top < window.innerHeight * 0.5) {
+        const p = parseInt(w.dataset.page);
+        if (p !== pdfCurrentPage) {
+          pdfCurrentPage = p;
+          document.getElementById('pdfPageInfo').textContent = `${p} / ${pdfTotalPages}`;
+        }
+      }
+    });
+  }, { passive: true });
+}
+
+function pdfGoToPage(n) {
+  const body = document.getElementById('pdfBody');
+  const wrap = body.querySelector(`[data-page="${n}"]`);
+  if (wrap) wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function pdfNextPage() {
+  if (pdfCurrentPage < pdfTotalPages) pdfGoToPage(pdfCurrentPage + 1);
+}
+function pdfPrevPage() {
+  if (pdfCurrentPage > 1) pdfGoToPage(pdfCurrentPage - 1);
 }
 
 function closePDF() {
   document.getElementById('pdfViewer').classList.remove('open');
-  document.getElementById('pdfFrame').src = '';
-  const loading = document.getElementById('pdfLoading');
-  if (loading) loading.style.display = 'flex';
   document.body.style.overflow = '';
+  pdfDoc = null; pdfCurrentPage = 1; pdfTotalPages = 0;
+  document.getElementById('pdfBody').innerHTML = '';
+  document.getElementById('pdfPageInfo').textContent = '— / —';
 }
 </script>
 </body>
