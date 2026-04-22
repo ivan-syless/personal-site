@@ -433,94 +433,32 @@ section { padding: 5rem 1.25rem 3.5rem; position: relative; z-index: 1; }
   margin-bottom: 1.75rem; max-width: 560px;
 }
 
-/* ── Custom cursor (PC only) ── */
-#cursor {
-  width: 10px; height: 10px;
-  border: 1.5px solid var(--accent); border-radius: 50%;
-  position: fixed; top: 0; left: 0; pointer-events: none;
-  transform: translate(-50%,-50%);
-  transition: width .2s, height .2s, background .2s, border-color .2s;
-  z-index: 9999;
-  display: none;
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 10px; margin-bottom: 1.5rem;
 }
-@media (hover: hover) and (pointer: fine) {
-  #cursor { display: block; }
-  body { cursor: none; }
-  a, button { cursor: none; }
-}
-#cursor.hover { width: 34px; height: 34px; background: var(--glow); border-color: var(--accent2); }
-
-/* ── Horizontal photo strip ── */
-.photo-strip-wrap {
-  position: relative;
-  margin-bottom: 1.5rem;
-  user-select: none;
-}
-
-.photo-strip {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  overflow-y: hidden;
-  scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
-  padding-bottom: 6px;
-  cursor: grab;
-}
-.photo-strip:active { cursor: grabbing; }
-.photo-strip::-webkit-scrollbar { height: 3px; }
-.photo-strip::-webkit-scrollbar-track { background: transparent; }
-.photo-strip::-webkit-scrollbar-thumb { background: var(--dim); border-radius: 2px; }
+@media (min-width: 600px) { .photo-grid { gap: 10px; } }
 
 .photo-thumb {
-  flex: 0 0 auto;
-  width: 200px; height: 200px;
-  border-radius: 3px; overflow: hidden;
-  position: relative;
-  scroll-snap-align: start;
+  aspect-ratio: 1; border-radius: 2px; overflow: hidden;
+  position: relative; cursor: pointer;
 }
-@media (min-width: 768px) {
-  .photo-thumb { width: 260px; height: 260px; }
-}
-
 .photo-thumb-inner {
   width: 100%; height: 100%;
   display: flex; align-items: center; justify-content: center;
   font-size: 1.5rem; transition: transform .3s;
 }
-.photo-thumb:hover .photo-thumb-inner { transform: scale(1.05); }
-
-/* ── Lightbox with fade-in delay ── */
+.photo-thumb:hover .photo-thumb-inner,
+.photo-thumb:active .photo-thumb-inner { transform: scale(1.07); }
 
 /* ── Lightbox ── */
 #lightbox {
-  position: fixed; inset: 0;
-  background: rgba(4,8,14,0);
-  z-index: 500; display: flex; align-items: center; justify-content: center; flex-direction: column;
-  pointer-events: none; opacity: 0;
+  display: none; position: fixed; inset: 0;
+  background: rgba(4,8,14,0.97);
+  z-index: 500; align-items: center; justify-content: center; flex-direction: column;
 }
-#lightbox.open {
-  pointer-events: all;
-  animation: lbFadeIn 0.35s ease forwards;
-}
-#lightbox.closing {
-  animation: lbFadeOut 0.25s ease forwards;
-}
-@keyframes lbFadeIn {
-  0%   { opacity: 0; background: rgba(4,8,14,0); }
-  40%  { opacity: 1; background: rgba(4,8,14,0.97); }
-  100% { opacity: 1; background: rgba(4,8,14,0.97); }
-}
-@keyframes lbFadeOut {
-  0%   { opacity: 1; background: rgba(4,8,14,0.97); }
-  100% { opacity: 0; background: rgba(4,8,14,0); }
-}
-.lb-content {
-  display: flex; flex-direction: column; align-items: center; width: 100%;
-  opacity: 0; transform: scale(0.96);
-  transition: opacity 0.25s 0.12s, transform 0.25s 0.12s;
-}
-#lightbox.open .lb-content { opacity: 1; transform: scale(1); }
+#lightbox.open { display: flex; }
 
 .lb-top {
   position: absolute; top: 0; left: 0; right: 0;
@@ -608,28 +546,29 @@ footer span { font-size: .65rem; color: var(--dim); letter-spacing: .06em; }
 #pdfViewer {
   position: fixed; inset: 0;
   background: rgba(4,8,14,0.98);
-  z-index: 600; display: flex;
-  flex-direction: column;
+  z-index: 600;
+  display: flex; flex-direction: column;
   pointer-events: none; opacity: 0;
-  transition: opacity 0.3s;
+  transition: opacity 0.25s;
 }
 #pdfViewer.open { pointer-events: all; opacity: 1; }
 
 .pdf-topbar {
   display: flex; justify-content: space-between; align-items: center;
-  padding: .7rem 1.25rem;
+  padding: .65rem 1.25rem;
   border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
+  flex-shrink: 0; gap: 1rem;
 }
 .pdf-title {
-  font-size: .72rem; color: var(--muted);
-  letter-spacing: .1em; text-transform: uppercase;
+  font-size: .7rem; color: var(--muted);
+  letter-spacing: .09em; text-transform: uppercase;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.pdf-actions { display: flex; gap: .6rem; align-items: center; }
+.pdf-actions { display: flex; gap: .6rem; align-items: center; flex-shrink: 0; }
 .pdf-open-btn {
   font-size: .7rem; color: var(--accent2);
   background: none; border: 1px solid rgba(126,200,227,.25);
-  padding: .35rem .85rem; border-radius: 2px;
+  padding: .32rem .85rem; border-radius: 2px;
   font-family: 'JetBrains Mono', monospace; letter-spacing: .07em;
   cursor: pointer; text-decoration: none;
   transition: background .2s, border-color .2s;
@@ -638,28 +577,24 @@ footer span { font-size: .65rem; color: var(--dim); letter-spacing: .06em; }
 .pdf-close {
   font-size: .7rem; color: var(--muted);
   background: none; border: 1px solid var(--border);
-  padding: .35rem .85rem; border-radius: 2px;
+  padding: .32rem .85rem; border-radius: 2px;
   font-family: 'JetBrains Mono', monospace; letter-spacing: .08em;
   cursor: pointer; transition: color .2s, border-color .2s;
 }
 .pdf-close:hover { color: var(--white); border-color: var(--accent); }
-
-.pdf-body {
-  flex: 1; overflow: hidden; position: relative;
-  background: #1a1a1a;
-}
-.pdf-body iframe {
-  width: 100%; height: 100%; border: none; display: block;
-}
-.pdf-body object {
-  width: 100%; height: 100%; display: block;
+.pdf-body { flex: 1; overflow: hidden; background: #1c1c1c; }
+.pdf-body iframe { width: 100%; height: 100%; border: none; display: block; }
+.pdf-loading {
+  display: flex; align-items: center; justify-content: center;
+  height: 100%; flex-direction: column; gap: .75rem;
+  font-family: 'EB Garamond', serif; font-style: italic;
+  font-size: 1rem; color: var(--muted);
 }
 </style>
 </head>
 <body>
 
 <canvas id="stars"></canvas>
-<div id="cursor"></div>
 
 <!-- Nav -->
 <nav>
@@ -921,15 +856,18 @@ t = <span class="c-fn">np.linspace</span>(<span class="c-num">0</span>, <span cl
   <h2 class="section-title">Through<br><em>the lens</em></h2>
   <p class="photo-intro">I shoot with a DSLR — capturing light, texture, and moments worth keeping. Tap any photo to view it full screen.</p>
 
-  <div class="photo-strip-wrap">
-    <div class="photo-strip" id="photoStrip">
-      <div class="photo-thumb" onclick="openLightbox(0)"><div class="photo-thumb-inner" style="background:#0d1a24;"><img src="images/1.JPG" style="width:100%;height:100%;object-fit:cover;pointer-events:none;" /></div></div>
-      <div class="photo-thumb" onclick="openLightbox(1)"><div class="photo-thumb-inner" style="background:#0d1a24;"><img src="images/2.JPG" style="width:100%;height:100%;object-fit:cover;pointer-events:none;" /></div></div>
-      <div class="photo-thumb" onclick="openLightbox(2)"><div class="photo-thumb-inner" style="background:#0d1a24;"><img src="images/3.JPG" style="width:100%;height:100%;object-fit:cover;pointer-events:none;" /></div></div>
-      <div class="photo-thumb" onclick="openLightbox(3)"><div class="photo-thumb-inner" style="background:#0d1a24;"><img src="images/4.JPG" style="width:100%;height:100%;object-fit:cover;pointer-events:none;" /></div></div>
-      <div class="photo-thumb" onclick="openLightbox(4)"><div class="photo-thumb-inner" style="background:#0d1a24;"><img src="images/5.JPG" style="width:100%;height:100%;object-fit:cover;pointer-events:none;" /></div></div>
-      <div class="photo-thumb" onclick="openLightbox(5)"><div class="photo-thumb-inner" style="background:#0d1a24;"><img src="images/6.JPG" style="width:100%;height:100%;object-fit:cover;pointer-events:none;" /></div></div>
-    </div>
+  <div class="photo-grid">
+    <div class="photo-thumb" onclick="openLightbox(0)"><div class="photo-thumb-inner" style="background:linear-gradient(135deg,#1a2a3a,#2a4a5a)"><img src="images/1.JPG" style="width:100%;height:100%;object-fit:cover;" /></div></div>
+    <div class="photo-thumb" onclick="openLightbox(0)"><div class="photo-thumb-inner" style="background:linear-gradient(135deg,#1a2a3a,#2a4a5a)"><img src="images/2.JPG" style="width:100%;height:100%;object-fit:cover;" /></div></div>
+    <div class="photo-thumb" onclick="openLightbox(0)"><div class="photo-thumb-inner" style="background:linear-gradient(135deg,#1a2a3a,#2a4a5a)"><img src="images/3.JPG" style="width:100%;height:100%;object-fit:cover;" /></div></div>
+    <div class="photo-thumb" onclick="openLightbox(0)"><div class="photo-thumb-inner" style="background:linear-gradient(135deg,#1a2a3a,#2a4a5a)"><img src="images/4.JPG" style="width:100%;height:100%;object-fit:cover;" /></div></div>
+    <div class="photo-thumb" onclick="openLightbox(0)"><div class="photo-thumb-inner" style="background:linear-gradient(135deg,#1a2a3a,#2a4a5a)"><img src="images/5.JPG" style="width:100%;height:100%;object-fit:cover;" /></div></div>
+    <div class="photo-thumb" onclick="openLightbox(0)"><div class="photo-thumb-inner" style="background:linear-gradient(135deg,#1a2a3a,#2a4a5a)"><img src="images/6.JPG" style="width:100%;height:100%;object-fit:cover;" /></div></div>
+    <div class="photo-thumb" onclick="openLightbox(1)"><div class="photo-thumb-inner" style="background:linear-gradient(135deg,#1a1a2a,#3a2a4a)">🌃</div></div>
+    <div class="photo-thumb" onclick="openLightbox(2)"><div class="photo-thumb-inner" style="background:linear-gradient(135deg,#1a2a1a,#2a4a3a)">🌿</div></div>
+    <div class="photo-thumb" onclick="openLightbox(3)"><div class="photo-thumb-inner" style="background:linear-gradient(135deg,#2a1a1a,#4a2a1a)">🌅</div></div>
+    <div class="photo-thumb" onclick="openLightbox(4)"><div class="photo-thumb-inner" style="background:linear-gradient(135deg,#1a2a2a,#1a3a4a)">🏞</div></div>
+    <div class="photo-thumb" onclick="openLightbox(5)"><div class="photo-thumb-inner" style="background:linear-gradient(135deg,#2a2a1a,#3a4a1a)">🌾</div></div>
   </div>
 
   <button class="btn-outline" style="font-size:.72rem;padding:.65rem 1.4rem;" onclick="openLightbox(0)">View Work →</button>
@@ -957,31 +895,29 @@ t = <span class="c-fn">np.linspace</span>(<span class="c-num">0</span>, <span cl
 
 <!-- Lightbox -->
 <div id="lightbox">
-  <div class="lb-content">
-    <div class="lb-top">
-      <span class="lb-counter-top" id="lbCounter"></span>
-      <button class="lb-close" onclick="closeLightbox()">✕ close</button>
-    </div>
-    <div class="lb-stage">
-      <button class="lb-arrow prev" onclick="lbPrev()">&#8592;</button>
-      <div class="lb-frame" id="lbFrame"></div>
-      <button class="lb-arrow next" onclick="lbNext()">&#8594;</button>
-    </div>
-    <div class="lb-caption" id="lbCaption"></div>
-    <div class="lb-swipe-hint">swipe or use arrows to navigate</div>
+  <div class="lb-top">
+    <span class="lb-counter-top" id="lbCounter"></span>
+    <button class="lb-close" onclick="closeLightbox()">✕ close</button>
   </div>
+  <div class="lb-stage">
+    <button class="lb-arrow prev" onclick="lbPrev()">&#8592;</button>
+    <div class="lb-frame" id="lbFrame"></div>
+    <button class="lb-arrow next" onclick="lbNext()">&#8594;</button>
+  </div>
+  <div class="lb-caption" id="lbCaption"></div>
+  <div class="lb-swipe-hint">swipe or use arrows to navigate</div>
 </div>
-<!-- PDF Viewer -->
 <div id="pdfViewer">
   <div class="pdf-topbar">
-    <span class="pdf-title" id="pdfTitle">Thesis</span>
+    <span class="pdf-title" id="pdfTitle">Document</span>
     <div class="pdf-actions">
       <a class="pdf-open-btn" id="pdfOpenLink" href="#" target="_blank">Open in new tab ↗</a>
       <button class="pdf-close" onclick="closePDF()">✕ close</button>
     </div>
   </div>
   <div class="pdf-body">
-    <iframe id="pdfFrame" src="" title="PDF viewer"></iframe>
+    <div class="pdf-loading" id="pdfLoading">Loading document…</div>
+    <iframe id="pdfFrame" src="" title="PDF viewer" onload="document.getElementById('pdfLoading').style.display='none'"></iframe>
   </div>
 </div>
 <script>
@@ -1008,19 +944,6 @@ function drawStars() {
 }
 resizeCanvas(); initStars(); drawStars();
 window.addEventListener('resize', () => { resizeCanvas(); initStars(); });
-
-// ── Custom cursor (PC only) ────────────────────────────────────
-const cursor = document.getElementById('cursor');
-if (cursor) {
-  document.addEventListener('mousemove', e => {
-    cursor.style.left = e.clientX + 'px';
-    cursor.style.top  = e.clientY + 'px';
-  });
-  document.querySelectorAll('a, button, .photo-thumb, .research-card, .lang-card, .cwork-card, .skill-item').forEach(el => {
-    el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
-    el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
-  });
-}
 
 // ── Hamburger menu ─────────────────────────────────────────────
 const navToggle = document.getElementById('navToggle');
@@ -1054,76 +977,57 @@ window.addEventListener('scroll', () => {
     a.classList.toggle('active', a.getAttribute('href') === '#'+cur));
 });
 
-// ── Drag-to-scroll photo strip ─────────────────────────────────
-const strip = document.getElementById('photoStrip');
-if (strip) {
-  let isDown = false, startX, scrollLeft;
-  strip.addEventListener('mousedown', e => {
-    isDown = true; strip.classList.add('active');
-    startX = e.pageX - strip.offsetLeft;
-    scrollLeft = strip.scrollLeft;
-  });
-  strip.addEventListener('mouseleave', () => { isDown = false; });
-  strip.addEventListener('mouseup',    () => { isDown = false; });
-  strip.addEventListener('mousemove',  e => {
-    if (!isDown) return;
-    e.preventDefault();
-    const x = e.pageX - strip.offsetLeft;
-    strip.scrollLeft = scrollLeft - (x - startX) * 1.2;
-  });
-}
-
-// ── Photography Lightbox ───────────────────────────────────────
+// ── Hobbies Lightbox ───────────────────────────────────────
+// To use real photos, change `icon` to an img tag like:
+// icon: '<img src="photo1.jpg" style="width:100%;height:100%;object-fit:cover;" />'
 const photos = [
-  { src: 'images/1.JPG', label: '300mm f/6.3 1/500s ISO:400', caption: '' },
-  { src: 'images/2.JPG', label: '',                            caption: '' },
-  { src: 'images/3.JPG', label: '',                            caption: '' },
-  { src: 'images/4.JPG', label: '',                            caption: '' },
-  { src: 'images/5.JPG', label: '',                            caption: '' },
-  { src: 'images/6.JPG', label: '',                            caption: '' },
+  { icon: '<img src="images/1.JPG" style="width:100%;height:100%;object-fit:cover;" />', bg: 'linear-gradient(135deg,#1a2a3a,#2a4a5a)', label: '300mm f/6.3 1/500s ISO:400', caption: 'Replace placeholder with your real DSLR photo' },
+  { icon: '<img src="images/2.JPG" style="width:100%;height:100%;object-fit:cover;" />', bg: 'linear-gradient(135deg,#1a2a3a,#2a4a5a)', label: 'Golden hour landscape', caption: 'Replace placeholder with your real DSLR photo' },
+  { icon: '<img src="images/3.JPG" style="width:100%;height:100%;object-fit:cover;" />', bg: 'linear-gradient(135deg,#1a2a3a,#2a4a5a)', label: 'Golden hour landscape', caption: 'Replace placeholder with your real DSLR photo' },
+  { icon: '<img src="images/4.JPG" style="width:100%;height:100%;object-fit:cover;" />', bg: 'linear-gradient(135deg,#1a2a3a,#2a4a5a)', label: 'Golden hour landscape', caption: 'Replace placeholder with your real DSLR photo' },
+  { icon: '<img src="images/5.JPG" style="width:100%;height:100%;object-fit:cover;" />', bg: 'linear-gradient(135deg,#1a2a3a,#2a4a5a)', label: 'Golden hour landscape', caption: 'Replace placeholder with your real DSLR photo' },
+  { icon: '<img src="images/6.JPG" style="width:100%;height:100%;object-fit:cover;" />', bg: 'linear-gradient(135deg,#1a2a3a,#2a4a5a)', label: 'Golden hour landscape', caption: 'Replace placeholder with your real DSLR photo' },
+  { icon: '🌃', bg: 'linear-gradient(135deg,#1a1a2a,#3a2a4a)', label: 'Night scene',            caption: 'Replace placeholder with your real DSLR photo' },
+  { icon: '🌿', bg: 'linear-gradient(135deg,#1a2a1a,#2a4a3a)', label: 'Nature detail',          caption: 'Replace placeholder with your real DSLR photo' },
+  { icon: '🌅', bg: 'linear-gradient(135deg,#2a1a1a,#4a2a1a)', label: 'Sunrise',                caption: 'Replace placeholder with your real DSLR photo' },
+  { icon: '🏞',  bg: 'linear-gradient(135deg,#1a2a2a,#1a3a4a)', label: 'Landscape',              caption: 'Replace placeholder with your real DSLR photo' },
+  { icon: '🌾', bg: 'linear-gradient(135deg,#2a2a1a,#3a4a1a)', label: 'Textures',               caption: 'Replace placeholder with your real DSLR photo' },
 ];
 
 let current = 0;
 function renderLb() {
   const p = photos[current];
-  const frame = document.getElementById('lbFrame');
-  frame.style.background = '#0d1a24';
-  frame.innerHTML = `<img src="${p.src}" style="width:100%;height:100%;object-fit:contain;display:block;" />`;
+  document.getElementById('lbFrame').style.background = p.bg;
+  document.getElementById('lbFrame').innerHTML = `<div class="lb-icon">${p.icon}</div><div class="lb-label">${p.label}</div>`;
   document.getElementById('lbCounter').textContent = `${current+1} / ${photos.length}`;
-  document.getElementById('lbCaption').textContent = p.label || p.caption || '';
+  document.getElementById('lbCaption').textContent = p.caption;
 }
-
 function openLightbox(i) {
   current = i; renderLb();
-  const lb = document.getElementById('lightbox');
-  lb.classList.remove('closing');
-  lb.classList.add('open');
+  document.getElementById('lightbox').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
-
 function closeLightbox() {
-  const lb = document.getElementById('lightbox');
-  lb.classList.add('closing');
-  lb.addEventListener('animationend', () => {
-    lb.classList.remove('open', 'closing');
-    document.body.style.overflow = '';
-  }, { once: true });
+  document.getElementById('lightbox').classList.remove('open');
+  document.body.style.overflow = '';
 }
-
 function lbNext() { current = (current+1) % photos.length; renderLb(); }
 function lbPrev() { current = (current-1+photos.length) % photos.length; renderLb(); }
 
+// Keyboard
 document.addEventListener('keydown', e => {
   if (!document.getElementById('lightbox').classList.contains('open')) return;
   if (e.key === 'ArrowRight') lbNext();
   if (e.key === 'ArrowLeft')  lbPrev();
   if (e.key === 'Escape')     closeLightbox();
 });
+
+// Close on backdrop
 document.getElementById('lightbox').addEventListener('click', e => {
   if (e.target === document.getElementById('lightbox')) closeLightbox();
 });
 
-// Touch swipe
+// Touch swipe for lightbox
 let touchStartX = 0;
 document.getElementById('lightbox').addEventListener('touchstart', e => {
   touchStartX = e.touches[0].clientX;
@@ -1132,18 +1036,16 @@ document.getElementById('lightbox').addEventListener('touchend', e => {
   const dx = e.changedTouches[0].clientX - touchStartX;
   if (Math.abs(dx) > 50) { dx < 0 ? lbNext() : lbPrev(); }
 });
-
-// ── PDF Viewer ─────────────────────────────────────────────────
 function openPDF(src, title) {
-  const viewer = document.getElementById('pdfViewer');
-  const frame  = document.getElementById('pdfFrame');
-  const link   = document.getElementById('pdfOpenLink');
-  const label  = document.getElementById('pdfTitle');
-  // Use Google Docs viewer as fallback for GitHub Pages (no server-side headers)
-  // This renders the PDF cleanly inside the page with no toolbar prompts
-  const encoded = encodeURIComponent(location.origin + '/' + src.replace(/^\//, ''));
-  frame.src = src;
-  if (link) link.href = src;
+  const viewer  = document.getElementById('pdfViewer');
+  const frame   = document.getElementById('pdfFrame');
+  const link    = document.getElementById('pdfOpenLink');
+  const label   = document.getElementById('pdfTitle');
+  // Build the absolute URL of the PDF on GitHub Pages
+  const absURL  = window.location.origin + '/' + src.replace(/^\//, '');
+  // Route through Google Docs Viewer — renders inline, no download prompt
+  frame.src     = 'https://docs.google.com/viewer?url=' + encodeURIComponent(absURL) + '&embedded=true';
+  if (link)  link.href = absURL;
   if (label) label.textContent = title || 'Document';
   viewer.classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -1152,6 +1054,8 @@ function openPDF(src, title) {
 function closePDF() {
   document.getElementById('pdfViewer').classList.remove('open');
   document.getElementById('pdfFrame').src = '';
+  const loading = document.getElementById('pdfLoading');
+  if (loading) loading.style.display = 'flex';
   document.body.style.overflow = '';
 }
 </script>
