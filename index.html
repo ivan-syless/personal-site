@@ -756,7 +756,7 @@ footer span { font-size: .65rem; color: var(--dim); letter-spacing: .06em; }
       <div class="research-title">Your Thesis Title Here</div>
       <p class="research-desc">Replace with your real thesis summary — what problem you studied, what approach, and what you found.</p>
       <div class="research-tags"><span class="rtag">Replace</span><span class="rtag">With</span><span class="rtag">Real Tags</span></div>
-      <a href="#" class="research-link" onclick="openPDF('https://github.com/ivan-syless/personal-site/blob/main/files/thesis.pdf', 'Vacancy-Driven Electronic Structure Modulation in Monolayer WS₂'); return false;">Read thesis →</a>
+      <a href="#" class="research-link" onclick="openPDF('https://ivan-syless.github.io/personal-site/files/thesis.pdf', 'Vacancy-Driven Electronic Structure Modulation in Monolayer WS₂'); return false;">Read thesis →</a>
     </div>
     <div class="research-card" data-num="02">
       <div class="research-type">Non-Academic Project</div>
@@ -1094,8 +1094,6 @@ function openPDF(src, title) {
   const label  = document.getElementById('pdfTitle');
   if (link)  link.href = src;
   if (label) label.textContent = title || 'Document';
-  document.getElementById('pdfStatus').style.display = 'block';
-  document.getElementById('pdfStatus').textContent = 'Loading…';
   document.getElementById('pdfBody').innerHTML =
     '<div class="pdf-status" id="pdfStatus">Loading…</div>';
   viewer.classList.add('open');
@@ -1103,23 +1101,23 @@ function openPDF(src, title) {
   pdfCurrentPage = 1;
 
   loadPDFjs(() => {
-    pdfjsLib.getDocument(src).promise.then(doc => {
+    // Pass the URL directly to PDF.js — it fetches it as a binary stream
+    pdfjsLib.getDocument({ url: src, withCredentials: false }).promise.then(doc => {
       pdfDoc = doc;
       pdfTotalPages = doc.numPages;
-      // Render all pages stacked
       const body = document.getElementById('pdfBody');
       body.innerHTML = '';
       const renders = [];
       for (let p = 1; p <= pdfTotalPages; p++) renders.push(renderPDFPage(p, body));
       Promise.all(renders).then(() => {
         document.getElementById('pdfPageInfo').textContent = `1 / ${pdfTotalPages}`;
-        // Track which page is visible on scroll
         trackPDFScroll(body);
       });
     }).catch(err => {
       document.getElementById('pdfBody').innerHTML =
-        `<div class="pdf-status">Could not load PDF.<br><a href="${src}" style="color:var(--accent2)" target="_blank">Click here to download it instead.</a></div>`;
-      console.error(err);
+        `<div class="pdf-status">Could not load PDF.<br><br>
+         <a href="${src}" style="color:var(--accent2);font-family:\'JetBrains Mono\',monospace;font-size:.8rem;" target="_blank">Open PDF directly ↗</a></div>`;
+      console.error('PDF.js error:', err);
     });
   });
 }
