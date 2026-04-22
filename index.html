@@ -433,24 +433,57 @@ section { padding: 5rem 1.25rem 3.5rem; position: relative; z-index: 1; }
   margin-bottom: 1.75rem; max-width: 560px;
 }
 
-.photo-grid {
-  display: grid;
-  grid-template-columns: repeat(10, 1fr);
-  gap: 10px; margin-bottom: 1.5rem;
+/* ── Horizontal photo strip ── */
+.photo-strip-wrap {
+  margin-bottom: 1.5rem;
+  overflow: hidden;
 }
-@media (min-width: 600px) { .photo-grid { gap: 10px; } }
+
+.photo-strip {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 8px;
+  cursor: grab;
+  /* hide scrollbar on Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: var(--dim) transparent;
+}
+.photo-strip:active { cursor: grabbing; }
+.photo-strip::-webkit-scrollbar { height: 3px; }
+.photo-strip::-webkit-scrollbar-track { background: transparent; }
+.photo-strip::-webkit-scrollbar-thumb { background: var(--dim); border-radius: 2px; }
 
 .photo-thumb {
-  aspect-ratio: 1; border-radius: 2px; overflow: hidden;
-  position: relative; cursor: pointer;
+  flex: 0 0 auto;
+  width: 200px;
+  height: 280px;
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+  scroll-snap-align: start;
+  cursor: pointer;
+  transition: transform .25s, box-shadow .25s;
 }
+.photo-thumb:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,0.5); }
+
+@media (min-width: 600px) {
+  .photo-thumb { width: 240px; height: 320px; }
+}
+@media (min-width: 1024px) {
+  .photo-thumb { width: 260px; height: 360px; }
+}
+
 .photo-thumb-inner {
   width: 100%; height: 100%;
   display: flex; align-items: center; justify-content: center;
-  font-size: 1.5rem; transition: transform .3s;
+  font-size: 1.5rem;
+  transition: transform .35s;
 }
-.photo-thumb:hover .photo-thumb-inner,
-.photo-thumb:active .photo-thumb-inner { transform: scale(1.07); }
+.photo-thumb:hover .photo-thumb-inner { transform: scale(1.04); }
 
 /* ── Lightbox ── */
 #lightbox {
@@ -756,7 +789,7 @@ footer span { font-size: .65rem; color: var(--dim); letter-spacing: .06em; }
       <div class="research-title">Your Thesis Title Here</div>
       <p class="research-desc">Replace with your real thesis summary — what problem you studied, what approach, and what you found.</p>
       <div class="research-tags"><span class="rtag">Replace</span><span class="rtag">With</span><span class="rtag">Real Tags</span></div>
-      <a href="#" class="research-link" onclick="openPDF('https://ivan-syless.github.io/personal-site/files/thesis.pdf', 'Vacancy-Driven Electronic Structure Modulation in Monolayer WS₂'); return false;">Read thesis →</a>
+      <a href="#" class="research-link" onclick="openPDF('https://github.com/ivan-syless/personal-site/blob/main/files/thesis.pdf', 'Vacancy-Driven Electronic Structure Modulation in Monolayer WS₂'); return false;">Read thesis →</a>
     </div>
     <div class="research-card" data-num="02">
       <div class="research-type">Non-Academic Project</div>
@@ -888,18 +921,15 @@ t = <span class="c-fn">np.linspace</span>(<span class="c-num">0</span>, <span cl
   <h2 class="section-title">Through<br><em>the lens</em></h2>
   <p class="photo-intro">I shoot with a DSLR — capturing light, texture, and moments worth keeping. Tap any photo to view it full screen.</p>
 
-  <div class="photo-grid">
-    <div class="photo-thumb" onclick="openLightbox(0)"><div class="photo-thumb-inner" style="background:linear-gradient(135deg,#1a2a3a,#2a4a5a)"><img src="images/1.JPG" style="width:100%;height:100%;object-fit:cover;" /></div></div>
-    <div class="photo-thumb" onclick="openLightbox(0)"><div class="photo-thumb-inner" style="background:linear-gradient(135deg,#1a2a3a,#2a4a5a)"><img src="images/2.JPG" style="width:100%;height:100%;object-fit:cover;" /></div></div>
-    <div class="photo-thumb" onclick="openLightbox(0)"><div class="photo-thumb-inner" style="background:linear-gradient(135deg,#1a2a3a,#2a4a5a)"><img src="images/3.JPG" style="width:100%;height:100%;object-fit:cover;" /></div></div>
-    <div class="photo-thumb" onclick="openLightbox(0)"><div class="photo-thumb-inner" style="background:linear-gradient(135deg,#1a2a3a,#2a4a5a)"><img src="images/4.JPG" style="width:100%;height:100%;object-fit:cover;" /></div></div>
-    <div class="photo-thumb" onclick="openLightbox(0)"><div class="photo-thumb-inner" style="background:linear-gradient(135deg,#1a2a3a,#2a4a5a)"><img src="images/5.JPG" style="width:100%;height:100%;object-fit:cover;" /></div></div>
-    <div class="photo-thumb" onclick="openLightbox(0)"><div class="photo-thumb-inner" style="background:linear-gradient(135deg,#1a2a3a,#2a4a5a)"><img src="images/6.JPG" style="width:100%;height:100%;object-fit:cover;" /></div></div>
-    <div class="photo-thumb" onclick="openLightbox(1)"><div class="photo-thumb-inner" style="background:linear-gradient(135deg,#1a1a2a,#3a2a4a)">🌃</div></div>
-    <div class="photo-thumb" onclick="openLightbox(2)"><div class="photo-thumb-inner" style="background:linear-gradient(135deg,#1a2a1a,#2a4a3a)">🌿</div></div>
-    <div class="photo-thumb" onclick="openLightbox(3)"><div class="photo-thumb-inner" style="background:linear-gradient(135deg,#2a1a1a,#4a2a1a)">🌅</div></div>
-    <div class="photo-thumb" onclick="openLightbox(4)"><div class="photo-thumb-inner" style="background:linear-gradient(135deg,#1a2a2a,#1a3a4a)">🏞</div></div>
-    <div class="photo-thumb" onclick="openLightbox(5)"><div class="photo-thumb-inner" style="background:linear-gradient(135deg,#2a2a1a,#3a4a1a)">🌾</div></div>
+  <div class="photo-strip-wrap">
+    <div class="photo-strip" id="photoStrip">
+      <div class="photo-thumb" onclick="openLightbox(0)"><div class="photo-thumb-inner" style="background:#0d1a24;"><img src="images/1.JPG" style="width:100%;height:100%;object-fit:cover;pointer-events:none;" /></div></div>
+      <div class="photo-thumb" onclick="openLightbox(1)"><div class="photo-thumb-inner" style="background:#0d1a24;"><img src="images/2.JPG" style="width:100%;height:100%;object-fit:cover;pointer-events:none;" /></div></div>
+      <div class="photo-thumb" onclick="openLightbox(2)"><div class="photo-thumb-inner" style="background:#0d1a24;"><img src="images/3.JPG" style="width:100%;height:100%;object-fit:cover;pointer-events:none;" /></div></div>
+      <div class="photo-thumb" onclick="openLightbox(3)"><div class="photo-thumb-inner" style="background:#0d1a24;"><img src="images/4.JPG" style="width:100%;height:100%;object-fit:cover;pointer-events:none;" /></div></div>
+      <div class="photo-thumb" onclick="openLightbox(4)"><div class="photo-thumb-inner" style="background:#0d1a24;"><img src="images/5.JPG" style="width:100%;height:100%;object-fit:cover;pointer-events:none;" /></div></div>
+      <div class="photo-thumb" onclick="openLightbox(5)"><div class="photo-thumb-inner" style="background:#0d1a24;"><img src="images/6.JPG" style="width:100%;height:100%;object-fit:cover;pointer-events:none;" /></div></div>
+    </div>
   </div>
 
   <button class="btn-outline" style="font-size:.72rem;padding:.65rem 1.4rem;" onclick="openLightbox(0)">View Work →</button>
@@ -1011,6 +1041,28 @@ window.addEventListener('scroll', () => {
     a.classList.toggle('active', a.getAttribute('href') === '#'+cur));
 });
 
+// ── Drag-to-scroll photo strip ─────────────────────────────────
+const strip = document.getElementById('photoStrip');
+if (strip) {
+  let isDown = false, startX, scrollLeft, moved = false;
+  strip.addEventListener('mousedown', e => {
+    isDown = true; moved = false;
+    startX = e.pageX - strip.offsetLeft;
+    scrollLeft = strip.scrollLeft;
+  });
+  strip.addEventListener('mouseleave', () => { isDown = false; });
+  strip.addEventListener('mouseup', () => { isDown = false; });
+  strip.addEventListener('mousemove', e => {
+    if (!isDown) return;
+    e.preventDefault();
+    moved = true;
+    strip.scrollLeft = scrollLeft - (e.pageX - strip.offsetLeft - startX) * 1.2;
+  });
+  strip.querySelectorAll('.photo-thumb').forEach(thumb => {
+    thumb.addEventListener('click', e => { if (moved) { e.stopImmediatePropagation(); moved = false; } }, true);
+  });
+}
+
 // ── Hobbies Lightbox ───────────────────────────────────────
 // To use real photos, change `icon` to an img tag like:
 // icon: '<img src="photo1.jpg" style="width:100%;height:100%;object-fit:cover;" />'
@@ -1094,6 +1146,8 @@ function openPDF(src, title) {
   const label  = document.getElementById('pdfTitle');
   if (link)  link.href = src;
   if (label) label.textContent = title || 'Document';
+  document.getElementById('pdfStatus').style.display = 'block';
+  document.getElementById('pdfStatus').textContent = 'Loading…';
   document.getElementById('pdfBody').innerHTML =
     '<div class="pdf-status" id="pdfStatus">Loading…</div>';
   viewer.classList.add('open');
@@ -1101,23 +1155,23 @@ function openPDF(src, title) {
   pdfCurrentPage = 1;
 
   loadPDFjs(() => {
-    // Pass the URL directly to PDF.js — it fetches it as a binary stream
-    pdfjsLib.getDocument({ url: src, withCredentials: false }).promise.then(doc => {
+    pdfjsLib.getDocument(src).promise.then(doc => {
       pdfDoc = doc;
       pdfTotalPages = doc.numPages;
+      // Render all pages stacked
       const body = document.getElementById('pdfBody');
       body.innerHTML = '';
       const renders = [];
       for (let p = 1; p <= pdfTotalPages; p++) renders.push(renderPDFPage(p, body));
       Promise.all(renders).then(() => {
         document.getElementById('pdfPageInfo').textContent = `1 / ${pdfTotalPages}`;
+        // Track which page is visible on scroll
         trackPDFScroll(body);
       });
     }).catch(err => {
       document.getElementById('pdfBody').innerHTML =
-        `<div class="pdf-status">Could not load PDF.<br><br>
-         <a href="${src}" style="color:var(--accent2);font-family:\'JetBrains Mono\',monospace;font-size:.8rem;" target="_blank">Open PDF directly ↗</a></div>`;
-      console.error('PDF.js error:', err);
+        `<div class="pdf-status">Could not load PDF.<br><a href="${src}" style="color:var(--accent2)" target="_blank">Click here to download it instead.</a></div>`;
+      console.error(err);
     });
   });
 }
