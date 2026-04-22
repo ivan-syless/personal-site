@@ -717,7 +717,7 @@ footer span { font-size: .65rem; color: var(--dim); letter-spacing: .06em; }
       <div class="research-title">Your Thesis Title Here</div>
       <p class="research-desc">Replace with your real thesis summary — what problem you studied, what approach, and what you found.</p>
       <div class="research-tags"><span class="rtag">Replace</span><span class="rtag">With</span><span class="rtag">Real Tags</span></div>
-      <a href="#" class="research-link" onclick="openPDF('https://drive.google.com/file/d/17SiOmn1nvCqTQ-LRZ-lftfPQEQP7wcNb/preview')">Read thesis summary →</a>
+      <a href="#" class="research-link" onclick="openPDF('files/thesis.pdf'); return false;">Read thesis summary →</a>
     </div>
     <div class="research-card" data-num="02">
       <div class="research-type">Non-Academic Project</div>
@@ -903,7 +903,7 @@ t = <span class="c-fn">np.linspace</span>(<span class="c-num">0</span>, <span cl
 <div id="pdfViewer">
   <div class="pdf-box">
     <button class="pdf-close" onclick="closePDF()">✕ close</button>
-    <iframe id="pdfFrame" type="application/pdf"></iframe>
+    <iframe src="files/thesis.pdf#toolbar=0"></iframe>
   </div>
 </div>
 <script>
